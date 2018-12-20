@@ -4,7 +4,7 @@ class Usuario {
     var correo      :String ?= null
     var contrasenia :String ?= null
 
-    enum class Metodos{
+    enum class MetodosEnvio{
         CORREO_VACIO,
         CORREO_VALIDO,
         CONTRASENA_VACIA,
@@ -12,21 +12,32 @@ class Usuario {
         ES_USUARIO_FIREBASE,
     }
 
-    open class Validaciones{
+    enum class MetodosFallaAutenticacion{
+        USUARIO_REGISTRADO,
+        CORREO_NO_REGISTRADO,
+        CONTRASENIA_INCORRECTA,
+    }
 
-        fun generadorMapaValidaciones(mapaValidaciones:MutableMap<Metodos,()->Unit>,fallaUsuarioFirebase:()->Unit):MutableMap<(Any?)->Boolean,()->Unit>{
+    open class ValidacionesEnvio{
+
+        fun generadorMapaValidaciones(
+                mapaValidacionesEnvio:MutableMap<MetodosEnvio,()->Unit>,
+                fallaUsuarioFirebase:()->Unit
+                ):MutableMap<(Any?)->Boolean,()->Unit>{
             val mapaFunciones = emptyMap<(Any?)->Boolean,()->Unit>().toMutableMap()
             mapaFunciones.put(::usuarioInvalido,fallaUsuarioFirebase)
-            mapaValidaciones.forEach {
+            mapaValidacionesEnvio.forEach {
                 when(it.key){
-                    Metodos.CORREO_VACIO-> mapaFunciones.put(::CorreoVacioInvalido,it.value)
-                    Metodos.CONTRASENA_VACIA -> mapaFunciones.put(::ContraseniaVaciaInvalido,it.value)
-                    Metodos.CORREO_VALIDO -> mapaFunciones.put(::CorreoValidoInvalido,it.value)
-                    Metodos.CONTRASENIA_VALIDO -> mapaFunciones.put(::ContraseniaValidaInvalido,it.value)
+                    MetodosEnvio.CORREO_VACIO-> mapaFunciones.put(::CorreoVacioInvalido,it.value)
+                    MetodosEnvio.CONTRASENA_VACIA -> mapaFunciones.put(::ContraseniaVaciaInvalido,it.value)
+                    MetodosEnvio.CORREO_VALIDO -> mapaFunciones.put(::CorreoValidoInvalido,it.value)
+                    MetodosEnvio.CONTRASENIA_VALIDO -> mapaFunciones.put(::ContraseniaValidaInvalido,it.value)
                 }
             }
             return mapaFunciones
         }
+
+
         private fun usuarioInvalido(objeto: Any?):Boolean{
             if(objeto !is Usuario){
                 return true
@@ -70,4 +81,5 @@ class Usuario {
             return false
         }
     }
+
 }
